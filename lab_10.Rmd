@@ -1,0 +1,108 @@
+---
+title: "lab_10"
+author: "Peyton Moore"
+date: "12/3/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(corrplot)
+library(beepr)
+library(praise)
+library(stargazer)
+library(sf)
+library(gganimate)
+library(transformr)
+```
+
+
+
+
+### 1. Multiple linear regression 
+
+```{r}
+homes <- read_csv("slo_homes.csv") %>% 
+  clean_names()
+
+
+#beep(6)
+#names(praise_parts)
+praise("You are totally ${adjective}! Super ${EXCLAMATION}!")
+
+```
+
+```{r}
+homes_sub <- homes %>% 
+  filter(city %in% c("San Luis Obispo", "Atascadero", "Arroyo Grande"))
+```
+
+Are there correlations btw variables that we'd consider while trying to model home price??
+
+```{r}
+homes_cor <- cor(homes_sub[2:5])
+
+homes_cor
+
+corrplot(homes_cor, 
+         method = "ellipse", 
+         type = "upper")
+```
+
+
+```{r}
+ggplot(data = homes_sub, aes(x = sq_ft, y = price))+
+  geom_point()
+
+ggplot(data = homes_sub, aes(x = bedrooms, y = price))+
+  geom_point()
+```
+
+Let's start with a complete model (includes city, bedrooms, bathrooms, sq_ft, and sale status):
+
+```{r}
+homes_lm <- lm(price~city + bedrooms+bathrooms+sq_ft+status, 
+               data = homes_sub)
+
+
+summary(homes_lm)
+```
+Just use sq_ft this time
+
+```{r}
+homes_lm2 <- lm(price ~ city + sq_ft + status, 
+               data = homes_sub)
+
+
+summary(homes_lm2)
+```
+
+AIC:
+
+```{r}
+AIC(homes_lm)
+AIC(homes_lm2)
+
+
+
+```
+
+### Now: check assumptions for normality and homoskedasticity 
+
+```{r}
+
+plot(homes_lm2)
+# Yep, looks like the assumption of homoskedacticity is OK
+
+
+
+```
+
+
+
+
+
+
+
